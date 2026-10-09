@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WP Site Audit</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f3864'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' stroke='%23fff' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><div><h1>WP Site Audit</h1><p>WordPress-oldalak felmérése bejelentkezés nélkül</p></div></div>
+  <nav>
+    <span class="who hidden" id="who"></span>
+    <button class="ghost" id="btnRuns" type="button">Korábbi felmérések</button>
+    <button class="ghost" id="btnSched" type="button">Ütemezések</button>
+    <button class="ghost" id="btnSettings" type="button">Beállítások</button>
+    <button class="ghost hidden" id="btnLogout" type="button">Kilépés</button>
+  </nav>
+</header>
+
+<main>
+  <section class="card" id="newRun">
+    <h2>Új felmérés</h2>
+    <div class="grid2">
+      <div>
+        <label for="domains">Domainek <span class="hint">soronként, vesszővel vagy szóközzel elválasztva; URL is jó</span></label>
+        <textarea id="domains" rows="9" spellcheck="false" placeholder="pelda.hu&#10;https://www.masik-oldal.hu/&#10;harmadik.com"></textarea>
+        <div class="count" id="count">0 domain</div>
+        <label class="csvup">CSV / TXT betöltése <span class="hint">domain és (opcionálisan) ügyfél neve oszloppal</span><input id="csvFile" type="file" accept=".csv,.txt,text/csv,text/plain"></label>
+        <div class="hint" id="csvInfo"></div>
+      </div>
+      <div class="opts">
+        <label for="runName">Megnevezés <span class="hint">opcionális, pl. ügyfél neve</span></label>
+        <input id="runName" type="text" maxlength="80" placeholder="pl. Ügynökség portfólió">
+        <fieldset>
+          <legend>Mérések</legend>
+          <label class="chk"><input type="checkbox" id="optSpam" checked> Spam / feltörés-szűrés <span class="hint">REST API, sitemap</span></label>
+          <label class="chk"><input type="checkbox" id="optGdpr" checked> GDPR / süti-mérés böngészővel <span class="hint">~10 mp / oldal</span></label>
+          <label class="chk"><input type="checkbox" id="optGeo" checked> SEO + GEO oldalelemzés (sitemapből) <span class="hint">title, description, AI-láthatóság; HTTP, ~1–2 mp / oldal</span></label>
+          <div class="row">
+            <label for="optGeoPages">SEO / GEO: vizsgált oldalak (legfeljebb 50)</label>
+            <input id="optGeoPages" type="number" min="1" max="50" value="30">
+          </div>
+          <label class="chk"><input type="checkbox" id="optA11y" checked> Akadálymentesség: WCAG 2.2 AA (axe-core) <span class="hint">főoldal + 2 aloldal, ~15 mp</span></label>
+          <label class="chk"><input type="checkbox" id="optW3c" checked> W3C HTML-validálás <span class="hint" id="w3cHint">főoldal + 4 oldal, hivatalos validátorral, ~10 mp</span></label>
+          <label class="chk"><input type="checkbox" id="optLinks"> Törött linkek keresése <span class="hint">a SEO / GEO oldalak linkjein, ~1–2 perc</span></label>
+          <label class="chk"><input type="checkbox" id="optDns" checked> E-mail hitelesítés és domain-lejárat <span class="hint">DNS, ~2 mp</span></label>
+          <label class="chk"><input type="checkbox" id="optAi"> MI-összefoglaló (helyi modell) <span class="hint" id="aiHint">CPU-n ~20–60 mp / oldal</span></label>
+          <label class="chk"><input type="checkbox" id="optSuggest"> MI-javaslatok: új címek, leírások, GYIK <span class="hint" id="suggestHint">~10–20 mp / javaslat</span></label>
+          <div class="row">
+            <label for="optSuggestPages">MI-javaslat: legfeljebb ennyi oldalra</label>
+            <input id="optSuggestPages" type="number" min="1" max="25" value="10">
+          </div>
+          <label class="chk"><input type="checkbox" id="optLh"> Lighthouse <span class="hint">~30–60 mp / oldal és profil</span></label>
+          <div class="row">
+            <label for="optDevice">Lighthouse-profil</label>
+            <select id="optDevice"><option value="both">mobil + asztali</option><option value="mobile">mobil</option><option value="desktop">asztali</option></select>
+          </div>
+          <div class="row">
+            <label for="optPages">Aloldalak (sitemapből)</label>
+            <input id="optPages" type="number" min="0" max="10" value="3" title="0 = csak a főoldal">
+          </div>
+          <div class="row">
+            <label for="optConc">Párhuzamos HTTP-felmérés</label>
+            <input id="optConc" type="number" min="1" max="8" value="4">
+          </div>
+        </fieldset>
+        <button id="btnStart" class="primary" type="button">Felmérés indítása</button>
+        <details class="sched">
+          <summary>Ütemezés és értesítés</summary>
+          <label for="optWebhook">Webhook-cím (Slack, Teams, Zapier…) <span class="hint">a felmérés végén értesít; ütemezésnél csak romlás esetén</span></label>
+          <input id="optWebhook" type="text" placeholder="https://hooks.slack.com/…">
+          <div class="row"><label for="schEvery">Ismétlés</label><select id="schEvery"><option value="weekly">hetente</option><option value="daily">naponta</option><option value="monthly">havonta</option></select></div>
+          <div class="row" id="schWeekdayRow"><label for="schWeekday">Nap</label><select id="schWeekday"><option value="1">hétfő</option><option value="2">kedd</option><option value="3">szerda</option><option value="4">csütörtök</option><option value="5">péntek</option><option value="6">szombat</option><option value="0">vasárnap</option></select></div>
+          <div class="row hidden" id="schMonthdayRow"><label for="schMonthday">A hónap napja</label><input id="schMonthday" type="number" min="1" max="28" value="1"></div>
+          <div class="row"><label for="schTime">Időpont</label><input id="schTime" type="time" value="06:00"></div>
+          <label class="chk"><input type="checkbox" id="schAlways"> Mindig értesítsen, ne csak romlás esetén</label>
+          <button id="btnSchedSave" class="ghost" type="button">Mentés ütemezésként (a fenti beállításokkal)</button>
+        </details>
+        <p class="hint small">A böngészős mérések a gépen telepített Chrome-ot vagy Edge-et használják.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hidden" id="results">
+    <div class="reshead">
+      <div>
+        <h2 id="resTitle">Eredmények</h2>
+        <p class="hint" id="resMeta"></p>
+      </div>
+      <div class="exports">
+        <button class="ghost" id="btnCancel" type="button">Leállítás</button>
+        <a class="btn" id="expProp" href="#" download>Javítási javaslatok <small>docx</small></a>
+        <a class="btn" id="expMail" href="#" download>Sablon e-mailek <small>docx</small></a>
+        <a class="btn" id="expXlsx" href="#" download>Táblázat <small>xlsx</small></a>
+        <a class="btn" id="expHtml" href="#" download>Riport <small>html</small></a>
+        <a class="btn" id="expPdf" href="#" download>Riport <small>pdf</small></a>
+        <a class="btn" id="expCsv" href="#" download title="A javasolt title / description szövegek">Szövegek <small>csv</small></a>
+      </div>
+    </div>
+    <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+    <div class="stats" id="stats"></div>
+    <div class="clientbar hidden" id="clientBar"><label for="clientFilter" style="display:inline;margin:0">Ügyfél:</label> <select id="clientFilter" style="width:auto"></select></div>
+    <div class="tablewrap">
+      <table id="tbl">
+        <thead><tr>
+          <th>Domain</th><th>Állapot</th><th>WordPress</th><th>Builder</th><th>PHP</th><th>Spam</th><th>GDPR</th><th title="GEO-pontszám (100-ból)">GEO</th><th title="Lighthouse Performance">LH</th><th title="Kritikus / magas megállapítás">Krit. / magas</th><th class="hcol" title="Rendbetétel + opcionális becsült óra">Óra</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <details class="log"><summary>Napló</summary><pre id="log"></pre></details>
+  </section>
+</main>
+
+<aside class="drawer hidden" id="drawer" aria-label="Részletek">
+  <div class="drawer-head"><h3 id="dTitle"></h3><button class="ghost" id="dClose" type="button" aria-label="Bezárás">✕</button></div>
+  <div id="dBody"></div>
+</aside>
+
+<dialog id="dlgSettings">
+  <form method="dialog" class="dlg">
+    <h3>Beállítások</h3>
+    <div class="grid2">
+      <div>
+        <h4>Dokumentumokhoz</h4>
+        <label>Készítő neve<input id="sName" type="text"></label>
+        <label>Cég / vállalkozás<input id="sCompany" type="text"></label>
+        <label>E-mailek küldője (cég)<input id="sOrg" type="text" placeholder="üresen {{CÉG NEVE}} mező marad"></label>
+        <label>Telefon<input id="sPhone" type="text"></label>
+        <label>E-mail<input id="sEmail" type="text"></label>
+        <label class="chk"><input id="sShowHours" type="checkbox"> Becsült óraszámok megjelenítése</label>
+        <h4>Árajánlat</h4>
+        <label>Óradíj (nettó)<input id="sRate" type="number" min="0" step="100" placeholder="0 = nem készül árajánlat"></label>
+        <div class="grid2"><label>ÁFA (%)<input id="sVat" type="number" min="0" max="100" step="1"></label><label>Pénznem<input id="sCur" type="text" maxlength="8"></label></div>
+        <h4>Arculat</h4>
+        <label>Szín<input id="sColor" type="color"></label>
+        <label>Logó <span class="hint">png / jpg, legfeljebb ~250 KB</span><input id="sLogo" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        <p class="hint"><img id="sLogoPrev" alt="" style="max-height:40px;display:none"> <button class="ghost" id="sLogoClear" type="button">Logó törlése</button></p>
+      </div>
+      <div>
+        <h4>Becsült óraszámok</h4>
+        <div class="hours" id="hours"></div>
+      </div>
+    </div>
+    <div id="accessBox"></div><p class="hint" id="accessNote"></p>
+    <div class="dlg-actions">
+      <button class="ghost" id="sReset" type="button">Alapértékek</button>
+      <span class="spacer"></span>
+      <button class="ghost" value="cancel">Mégse</button>
+      <button class="primary" id="sSave" value="save">Mentés</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgSched">
+  <div class="dlg">
+    <h3>Ütemezett felmérések</h3>
+    <ul id="schedList" class="runlist"></ul>
+    <div class="dlg-actions"><span class="spacer"></span><button class="ghost" id="schClose" type="button">Bezárás</button></div>
+  </div>
+</dialog>
+
+<dialog id="dlgRuns">
+  <div class="dlg">
+    <h3>Korábbi felmérések</h3>
+    <ul id="runList" class="runlist"></ul>
+    <div class="dlg-actions"><span class="spacer"></span><button class="ghost" id="rClose" type="button">Bezárás</button></div>
+  </div>
+</dialog>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>

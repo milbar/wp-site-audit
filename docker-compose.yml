@@ -1,0 +1,74 @@
+services:
+  wp-site-audit:
+    build: .
+    restart: unless-stopped
+    ports:
+      # Csak a gépről érhető el. Nyilvános eléréshez tegyél elé reverse proxyt (HTTPS), és állítsd be a COOKIE_SECURE=1 és ALLOWED_HOSTS változókat.
+      - "127.0.0.1:4580:4580"
+    environment:
+      TZ: ${TZ:-Europe/Budapest}
+      # Kötelező: HOST=0.0.0.0 mellett a szerver jelszó nélkül nem indul. Ez a „tartalék” admin-belépés;
+      # felhasználók felvétele: docker compose exec wp-site-audit node scripts/user.mjs add <név> <jelszó> admin
+      AUTH_USER: ${AUTH_USER:-admin}
+      AUTH_PASS: ${AUTH_PASS:?Állítsd be az AUTH_PASS változót (.env fájl vagy környezet)}
+      MAX_DOMAINS: ${MAX_DOMAINS:-200}
+      MAX_ACTIVE_RUNS: ${MAX_ACTIVE_RUNS:-1}
+      REQUEST_DELAY_MS: ${REQUEST_DELAY_MS:-500}
+      BROWSER_PAUSE_MS: ${BROWSER_PAUSE_MS:-3000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      # Opcionális külső szolgáltatások (kulcs nélkül az adott mérés kimarad)
+      WPSCAN_API_TOKEN: ${WPSCAN_API_TOKEN:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+      # Opcionális: nagyobb modell a címek/leírások írásához (pl. gemma3:12b, ~8 GB RAM, lassabb)
+      OLLAMA_SUGGEST_MODEL: ${OLLAMA_SUGGEST_MODEL:-}
+      # Böngésző-munkások: a Chrome-os mérések több konténeren párhuzamosan (lásd a „worker” szolgáltatást)
+      BROWSER_WORKER_HOST: ${BROWSER_WORKER_HOST:-worker:4590}
+      WORKER_TOKEN: ${WORKER_TOKEN:-}
+    volumes:
+      - audit-data:/data
+    shm_size: "1gb"
+    depends_on:
+      - ollama
+
+  # Böngésző-munkás: a GDPR-, akadálymentességi és Lighthouse-méréseket futtatja. Alapból ki van kapcsolva; bekapcsolás és skálázás:
+  #   (.env) WORKER_TOKEN=<legalább 16 véletlen karakter>
+  #   docker compose --profile scale up -d --scale worker=3
+  # Ha nincs futó munkás, az alkalmazás a saját Chrome-ját használja. Minden munkásnak fix CPU-keret jár (reprodukálhatóbb pontszámok).
+  worker:
+    build: .
+    profiles: ["scale"]
+    restart: unless-stopped
+    command: ["node", "worker.mjs"]
+    environment:
+      TZ: ${TZ:-Europe/Budapest}
+      WORKER_TOKEN: ${WORKER_TOKEN:-}
+      BROWSER_PAUSE_MS: ${BROWSER_PAUSE_MS:-3000}
+    shm_size: "1gb"
+    cpus: ${WORKER_CPUS:-2}
+    mem_limit: ${WORKER_MEM:-3g}
+
+  # Helyi MI az összefoglalókhoz. Csak a belső hálózaton érhető el (nincs kiosztott port).
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+
+  # Egyszeri modell-letöltés (első indításkor ~3 GB); utána kilép, a modell a kötetben marad.
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_SUGGEST_MODEL: ${OLLAMA_SUGGEST_MODEL:-}
+    entrypoint: ["/bin/sh", "-c", "for i in $$(seq 1 30); do ollama list >/dev/null 2>&1 && break; sleep 2; done; ollama pull ${OLLAMA_MODEL:-gemma3:4b}; if [ -n \"$$OLLAMA_SUGGEST_MODEL\" ]; then ollama pull \"$$OLLAMA_SUGGEST_MODEL\"; fi"]
+    restart: "no"
+
+volumes:
+  audit-data:
+  ollama-models:

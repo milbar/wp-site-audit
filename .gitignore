@@ -1,0 +1,16 @@
+node_modules/
+data/
+
+# titkok és helyi beállítások: SOHA nem kerülhetnek verziókezelésbe
+.env
+.env.*
+!.env.example
+
+# ideiglenes fájlok
+.preview*
+*.log
+.DS_Store
+
+# szerkesztők helyi beállításai
+.idea/
+.vscode/

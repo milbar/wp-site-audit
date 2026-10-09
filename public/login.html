@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Belépés – WP Site Audit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="loginpage">
+<main class="loginbox card">
+  <h1>WP Site Audit</h1>
+  <p class="hint">Jelentkezz be a folytatáshoz.</p>
+  <form id="loginForm" autocomplete="on">
+    <label for="lname">Név</label>
+    <input id="lname" name="username" type="text" autocomplete="username" autofocus required>
+    <label for="lpass" style="margin-top:10px">Jelszó</label>
+    <input id="lpass" name="password" type="password" autocomplete="current-password" required>
+    <p class="err" id="lerr" role="alert"></p>
+    <button class="primary" id="lbtn" type="submit">Belépés</button>
+  </form>
+</main>
+<script src="login.js" type="module"></script>
+</body>
+</html>
