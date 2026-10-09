@@ -43,6 +43,8 @@
             <input id="optGeoPages" type="number" min="1" max="50" value="30">
           </div>
           <label class="chk"><input type="checkbox" id="optA11y" checked> Akadálymentesség: WCAG 2.2 AA (axe-core) <span class="hint">főoldal + 2 aloldal, ~15 mp</span></label>
+          <div class="row"><label for="optA11yAll" style="margin:0"><input type="checkbox" id="optA11yAll"> A teljes sitemap összes oldala</label><input id="optA11yMax" type="number" min="5" max="300" value="100" title="legfeljebb ennyi oldal" style="max-width:90px"></div>
+          <p class="hint small" style="margin:0 0 6px 24px">oldalanként ~5 mp; a böngésző-munkásokon párhuzamosan fut. 100 oldal egy gépen ~8–10 perc.</p>
           <label class="chk"><input type="checkbox" id="optW3c" checked> W3C HTML-validálás <span class="hint" id="w3cHint">főoldal + 4 oldal, hivatalos validátorral, ~10 mp</span></label>
           <label class="chk"><input type="checkbox" id="optLinks"> Törött linkek keresése <span class="hint">a SEO / GEO oldalak linkjein, ~1–2 perc</span></label>
           <label class="chk"><input type="checkbox" id="optDns" checked> E-mail hitelesítés és domain-lejárat <span class="hint">DNS, ~2 mp</span></label>

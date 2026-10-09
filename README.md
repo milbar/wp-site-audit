@@ -7,7 +7,7 @@ WordPress-oldalak felmérése bejelentkezés nélkül. A domaineket egy szövegm
 ## Indítás
 
 ### Windows, Docker nélkül
-1. Telepítsd a [Node.js](https://nodejs.org) 20-as vagy újabb verzióját, valamint a Google Chrome-ot vagy a Microsoft Edge-et (a böngészős mérésekhez).
+1. Telepítsd a [Node.js](https://nodejs.org) 22.13-as vagy újabb verzióját, valamint a Google Chrome-ot vagy a Microsoft Edge-et (a böngészős mérésekhez).
 2. Futtasd a `start.bat` fájlt. Első induláskor telepíti a függőségeket (1–2 perc), utána megnyitja a felületet: <http://127.0.0.1:4580/>.
 3. A leállításhoz zárd be a konsolablakot. macOS / Linux alatt: `./start.sh`.
 
@@ -38,6 +38,7 @@ A csomag három szolgáltatást indít: az alkalmazást, egy helyi MI-szervert (
 | GEO (AI-keresők) | 100 pontos pontszám hat területen, AI-botok elérése és robots.txt, `llms.txt`, strukturált adat, szöveg a HTML-ben, megbízhatósági jelek; oldalanként legfeljebb 50 oldal a sitemapből |
 | Lighthouse | mobil és asztali profil egyszerre, főoldal és sitemapből választott aloldalak, táblázat színekkel és magyar magyarázattal; opcionálisan valós látogatói adat (CrUX) |
 | Akadálymentesség (WCAG) | axe-core, **WCAG 2.2 AA**: a főoldal és két aloldal; minden hibához a WCAG-kritérium száma és szintje, magyar szabálynevek és javítási tanácsok. Az automata teszt a kritériumok kb. 30–40%-át fedi, megfelelőségi igazolásnak nem elég |
+| Akadálymentesség: teljes sitemap | opcionális („A teljes sitemap összes oldala”, legfeljebb 300 oldal): a **pa11y-ci** két motorral, axe-core-ral és HTML_CodeSniffer-rel végigmegy a sitemap oldalain. Az eredmény szabályonként összesítve mutatja, hány oldalt érint egy hiba (a legtöbb hiba sablonszintű, egy javítás sok oldalt rendbe tesz), plusz a legtöbb hibát tartalmazó oldalak és minden oldal számai. Az oldalak 10-es csomagokban futnak, a böngésző-munkásokon párhuzamosan; a bot-védelmi oldalt hibátlannak nem veszi, hanem „nem mérhető”-ként jelzi. A HTML_CodeSniffer észrevételei kiegészítő jellegűek, súlyosságot nem adnak |
 | HTML-validálás (W3C) | a hivatalos Nu Html Checkerrel (Java kell hozzá, a Docker-képben benne van): a főoldal és négy másik oldal hibái és figyelmeztetései, a gyakori hibákhoz magyar magyarázattal. A CSS-validálás nem része |
 | Linkek | törött belső és külső linkek, hosszú átirányítási láncok |
 | E-mail és domain | MX, SPF, DKIM, DMARC; domain-lejárat (RDAP, ahol a végződéshez van szolgáltatás; a .hu-hoz jelenleg nincs) |

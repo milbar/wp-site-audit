@@ -79,6 +79,7 @@
     "mailTune": 0.5,
     "domainRenew": 0.25,
     "vulnFix": 0.25,
-    "w3cFix": 1.5
+    "w3cFix": 1.5,
+    "a11ySite": 4
   }
 }

@@ -43,7 +43,7 @@ $('#csvFile').addEventListener('change', async e => {
 $('#domains').addEventListener('input', () => { const n = parseDomains($('#domains').value).length; $('#count').textContent = `${n} domain`; });
 
 // az űrlap tartalma (a felmérés indítása és az ütemezés mentése közösen használja)
-const formBody = () => ({ text: $('#domains').value, clients: csvClients, name: $('#runName').value, webhookUrl: $('#optWebhook').value, spam: $('#optSpam').checked, gdpr: $('#optGdpr').checked, lighthouse: $('#optLh').checked, geo: $('#optGeo').checked, a11y: $('#optA11y').checked, w3c: $('#optW3c').checked, links: $('#optLinks').checked, dns: $('#optDns').checked, suggest: $('#optSuggest').checked, suggestPages: +$('#optSuggestPages').value || 10, ai: $('#optAi').checked, geoPages: +$('#optGeoPages').value || 30, device: $('#optDevice').value, pages: +$('#optPages').value || 0, concurrency: +$('#optConc').value });
+const formBody = () => ({ text: $('#domains').value, clients: csvClients, name: $('#runName').value, webhookUrl: $('#optWebhook').value, spam: $('#optSpam').checked, gdpr: $('#optGdpr').checked, lighthouse: $('#optLh').checked, geo: $('#optGeo').checked, a11y: $('#optA11y').checked, a11yAll: $('#optA11yAll').checked, a11yMax: +$('#optA11yMax').value || 100, w3c: $('#optW3c').checked, links: $('#optLinks').checked, dns: $('#optDns').checked, suggest: $('#optSuggest').checked, suggestPages: +$('#optSuggestPages').value || 10, ai: $('#optAi').checked, geoPages: +$('#optGeoPages').value || 30, device: $('#optDevice').value, pages: +$('#optPages').value || 0, concurrency: +$('#optConc').value });
 const admin = initAdmin({ $, api, esc, formBody });
 admin.loadMe();
 
@@ -280,3 +280,5 @@ $('#clientFilter').addEventListener('change', applyClientFilter);
 // a W3C-validáláshoz Java kell: ha a gépen nincs, a jelölőnégyzet kikapcsol
 fetch('/api/me').then(r => r.json()).then(m => { if (m.capabilities && !m.capabilities.w3c) { const c = $('#optW3c'); c.checked = false; c.disabled = true; $('#w3cHint').textContent = 'a Java nincs telepítve (Dockerben elérhető)'; } }).catch(() => {});
 Object.assign(HOUR_LABELS, { w3cFix: 'W3C HTML-hibák javítása' });
+
+Object.assign(HOUR_LABELS, { a11ySite: 'Akadálymentesség: teljes sitemap hibáinak javítása' });

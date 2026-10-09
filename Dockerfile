@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:22-bookworm-slim
 
 # Chromium a GDPR/süti-méréshez és a Lighthouse-hoz (a puppeteer-core nem tölt le sajátot)
 RUN apt-get update \
@@ -6,6 +6,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     HOST=0.0.0.0 \
     PORT=4580 \
     DATA_DIR=/data \

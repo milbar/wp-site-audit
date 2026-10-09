@@ -11,7 +11,7 @@
     "test": "node --test"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "dependencies": {
     "axe-core": "^4.14.0",
@@ -19,6 +19,7 @@
     "docx": "9.9.0",
     "exceljs": "4.4.0",
     "lighthouse": "12.8.2",
+    "pa11y-ci": "^5.0.0",
     "puppeteer-core": "23.11.1",
     "undici": "6.29.0",
     "vnu-jar": "^26.10.9"

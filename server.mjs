@@ -68,7 +68,7 @@ const activeCount = () => [...active.values()].filter(r => !r.data.finished).len
 // a felmérés beállításainak ellenőrzése (az API-ból és az ütemezésből is ide jön)
 function cleanOptions(b) {
   const wh = String(b.webhookUrl || '').trim().slice(0, 500);
-  return { name: String(b.name || '').slice(0, 80), gdpr: !!b.gdpr, lighthouse: !!b.lighthouse, geo: !!b.geo, a11y: !!b.a11y, links: !!b.links, w3c: b.w3c !== false, dns: b.dns !== false, ai: !!b.ai, suggest: !!b.suggest,
+  return { name: String(b.name || '').slice(0, 80), gdpr: !!b.gdpr, lighthouse: !!b.lighthouse, geo: !!b.geo, a11y: !!b.a11y, a11yAll: !!b.a11yAll, a11yMax: Math.min(300, Math.max(5, Math.floor(+b.a11yMax) || 100)), links: !!b.links, w3c: b.w3c !== false, dns: b.dns !== false, ai: !!b.ai, suggest: !!b.suggest,
     suggestPages: Math.min(25, Math.max(1, Math.floor(+b.suggestPages) || 10)), geoPages: Math.min(50, Math.max(1, Math.floor(+b.geoPages) || 30)), spam: b.spam !== false,
     device: ['desktop', 'both'].includes(b.device) ? b.device : 'mobile', pages: Math.min(10, Math.max(0, Math.floor(+b.pages) || 0)), concurrency: Math.min(8, Math.max(1, +b.concurrency || 4)),
     webhookUrl: /^https?:\/\//i.test(wh) ? wh : '' };

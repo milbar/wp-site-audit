@@ -19,6 +19,21 @@ export function checksHtml(R, { esc }) {
       + (a.violations.length ? `<div class="wrapx"><table class="mini"><thead><tr><th>Hiba</th><th>WCAG</th><th>Hatás</th><th>Elem</th><th>Javítás</th></tr></thead><tbody>${a.violations.map(v => `<tr><td>${esc(v.helpHu)}<small class="sub">${esc(v.id)}${v.samples?.[0] ? ' · ' + esc(v.samples[0]) : ''}</small></td><td>${wcagCell(v, esc)}</td><td><span class="chip ${IMPACT_CLS[v.impact] || ''}">${esc(IMPACT_HU[v.impact] || v.impact)}</span></td><td class="num">${v.count}</td><td>${esc(v.fixHu || '')}</td></tr>`).join('')}</tbody></table></div>` : ''));
   }
 
+  const all = R.a11yAll;
+  if (all || R.a11yAllNote) {
+    if (!all) sec('Akadálymentesség: a teljes sitemap', `<p class="hint">${esc(R.a11yAllNote)}</p>`);
+    else {
+      const ruleRows = all.rules.map(r => `<tr><td>${esc(r.helpHu)}<small class="sub">${esc(r.engine === 'HTMLCS' ? 'HTML_CodeSniffer' : 'axe-core')} · ${esc(r.id.replace(/^htmlcs:/, ''))}</small></td><td>${wcagCell(r, esc)}</td><td><span class="chip ${IMPACT_CLS[r.impact] || ''}">${esc(IMPACT_HU[r.impact] || r.impact)}</span></td><td class="num">${r.pages} / ${all.checked}</td><td class="num">${r.elements}</td></tr>`).join('');
+      const worst = [...all.pages].filter(p => p.counts).sort((a, b) => ((b.counts.critical || 0) * 3 + (b.counts.serious || 0) * 2 + (b.counts.moderate || 0)) - ((a.counts.critical || 0) * 3 + (a.counts.serious || 0) * 2 + (a.counts.moderate || 0))).slice(0, 10);
+      const pageRows = worst.map(p => { let pth = p.url; try { pth = new URL(p.url).pathname; } catch {} return `<tr><td title="${esc(p.url)}">${esc(pth)}</td><td class="num">${p.counts.critical}</td><td class="num">${p.counts.serious}</td><td class="num">${p.counts.moderate}</td><td class="num">${p.counts.minor}</td></tr>`; }).join('');
+      const allRows = all.pages.map(p => { let pth = p.url; try { pth = new URL(p.url).pathname; } catch {} return p.error ? `<tr><td>${esc(pth)}</td><td colspan="4" class="hint">${esc(p.error)}</td></tr>` : `<tr><td title="${esc(p.url)}">${esc(pth)}</td><td class="num">${p.counts.critical}</td><td class="num">${p.counts.serious}</td><td class="num">${p.counts.moderate}</td><td class="num">${p.counts.minor}</td></tr>`; }).join('');
+      sec('Akadálymentesség: a teljes sitemap', `<p class="hint">${all.checked} oldal ellenőrizve${all.total ? ` a sitemap ${all.total} oldalából${all.truncated ? ' (a beállított felső korlát miatt nem mind)' : ''}` : ''}${all.failed ? `, ${all.failed} oldal nem volt elérhető` : ''}. ${all.pagesWithSevere} oldalon van kritikus vagy súlyos hiba. Az azonos hibák többnyire a sablonból jönnek, ezért egy javítás sok oldalt rendbe tesz. A vizsgálatot a pa11y-ci végzi két motorral: az axe-core súlyosságot is ad, a HTML_CodeSniffer kiegészítő észrevételeket (súlyosság nélkül, ezek nem számítanak bele a súlyos / kritikus oldalak számába).</p>
+        <div class="wrapx"><table class="mini"><thead><tr><th>Hiba</th><th>WCAG</th><th>Hatás</th><th>Érintett oldal</th><th>Elem</th></tr></thead><tbody>${ruleRows}</tbody></table></div>
+        <p><b>Legtöbb hibát tartalmazó oldalak</b></p><div class="wrapx"><table class="mini"><thead><tr><th>Oldal</th><th>Kritikus</th><th>Súlyos</th><th>Közepes</th><th>Enyhe</th></tr></thead><tbody>${pageRows}</tbody></table></div>
+        <details class="expl"><summary>Minden vizsgált oldal (${all.pages.length})</summary><div class="wrapx"><table class="mini"><thead><tr><th>Oldal</th><th>Kritikus</th><th>Súlyos</th><th>Közepes</th><th>Enyhe</th></tr></thead><tbody>${allRows}</tbody></table></div></details>`);
+    }
+  }
+
   // aloldalak akadálymentessége (a GEO-bejárás oldalai közül)
   if (R.a11yPages?.length) {
     const rows = R.a11yPages.map(p => { let path = p.url; try { path = new URL(p.url).pathname; } catch {} return p.error ? `<tr><td>${esc(path)}</td><td colspan="4" class="hint">${esc(p.error)}</td></tr>` : `<tr><td title="${esc(p.url)}">${esc(path)}</td><td class="num"><span class="chip ${p.counts.critical ? 'c-bad' : ''}">${p.counts.critical}</span></td><td class="num"><span class="chip ${p.counts.serious ? 'c-bad' : ''}">${p.counts.serious}</span></td><td class="num">${p.counts.moderate}</td><td class="num">${p.counts.minor}</td></tr>`; }).join('');
